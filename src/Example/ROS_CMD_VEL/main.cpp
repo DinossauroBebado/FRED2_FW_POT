@@ -1,95 +1,119 @@
-#include <micro_ros_arduino.h>
+#include "micro_ros.h"
+#include <Arduino.h>
+#include <Main/config.h>
+#include <Main/controler.h>
+#include "rampa.h"
+#include "encoder.h"
+#include "MedianFilter.h"
+#include "cinematic.h"
+#include "power.h"
 
-#include <stdio.h>
-#include <rcl/rcl.h>
-#include <rcl/error_handling.h>
-#include <rclc/rclc.h>
-#include <rclc/executor.h>
+Encoder encoder(34, 35, 39,36);
 
-#include <geometry_msgs/msg/twist.h>
-
+MedianFilter encoderRightFilter(33,0);
+MedianFilter encoderLeftFilter(33,0);
 
 #include "controler.h"
-#include "config.h"
+Controler  esquerda_controler(1, 0, 0);  //(p,i,d)
+Controler  direita_controler(1, 0, 0);  //(p,i,d) ->0.4
 
-#include "rampa.h"
+// Controler  esquerda_controler(2, 0.5, 1);  //(p,i,d)
+// Controler  direita_controler(2, 0.5, 1);  //(p,i,d) ->0.4
 
-float linear, angular ;
+// p -> TEM QUE SER MENOR QUE 1, i= 20
 
 const int ACC = 50 ;
 // const int GAIN = 1 ;
 const int GAIN = 10 ;
 const int GAIN_ANGULAR = 7;
 
+bool _connect = false ;
 
-rcl_subscription_t subscriber;
-geometry_msgs__msg__Twist msg;
-rclc_executor_t executor;
-rcl_allocator_t allocator;
-rclc_support_t support;
-rcl_node_t node;
+float rpm_right = 0 ;
+float rpm_left = 0;
+
+float rpm = 0;
+float rpm_controled = 0;
+
+float controled_RPM_right;
+float controled_RPM_left ;
 
 
-#define LED_PIN 13
 
-#define RCCHECK(fn) { rcl_ret_t temp_rc = fn; if((temp_rc != RCL_RET_OK)){error_loop();}}
-#define RCSOFTCHECK(fn) { rcl_ret_t temp_rc = fn; if((temp_rc != RCL_RET_OK)){error_loop();}}
 
-void error_loop(){
-  while(1){
-    digitalWrite(LED_PIN, !digitalRead(LED_PIN));
-    delay(100);
-  }
-}
-
-//twist message cb
-void subscription_callback(const void *msgin) {
-const geometry_msgs__msg__Twist * msg = (const geometry_msgs__msg__Twist *)msgin;
-// if velocity in x direction is 0 turn off LED, if 1 turn on LED
-// cmd------ 
-
-float angular_speed_left = cinematic_left(linear,angular,GAIN); //wheel [rad/s]
-
-rpm_left = angular2rpm(angular_speed_left);// [RPM]
-float rpm_left_com_rampa = rampa(rpm_left, 200, LEFT);
-// rpm_left =  saturation(rpm_left,800);
-
-// float controled_RPM_left = rpm_left;
-float controled_RPM_left = esquerda_controler.output(rpm_left, rpm_encoder_read_left);
-
-write2motors(controled_RPM_left,controled_RPM_right);
-
-}
 
 void setup() {
-  set_microros_transports();
-  pinMode(LED_PIN, OUTPUT);
-  digitalWrite(LED_PIN, HIGH);  
-  
-  delay(2000);
-
-  allocator = rcl_get_default_allocator();
-
-   //create init_options
-  RCCHECK(rclc_support_init(&support, 0, NULL, &allocator));
-
-  // create node
-  RCCHECK(rclc_node_init_default(&node, "micro_ros_arduino_node", "", &support));
-
-  // create subscriber
-  RCCHECK(rclc_subscription_init_default(
-    &subscriber,
-    &node,
-    ROSIDL_GET_MSG_TYPE_SUPPORT(geometry_msgs, msg, Twist),
-    "micro_ros_arduino_twist_subscriber"));
-
-  // create executor
-  RCCHECK(rclc_executor_init(&executor, &support.context, 1, &allocator));
-  RCCHECK(rclc_executor_add_subscription(&executor, &subscriber, &msg, &subscription_callback, ON_NEW_DATA));
+  init_ros();
+  encoder.setup();
 
 }
 
 void loop() {
+
+    float linear = getLinear();//robot
+    float angular = getAngular();//robot
+
+    // debug = debugControl();
+
+    //---------------------LEFT-------------------------------------------
+    
+    // status -------encoder 
+    double angle_encoder_read_left  = encoder.readAngle(LEFT);
+
+    double rpm_encoder_read_left = encoder.readRPM(LEFT);
+    encoderLeftFilter.in(rpm_encoder_read_left);
+
+    rpm_encoder_read_left = encoderLeftFilter.out();
+
+    double ticks_encoder_read_left = encoder.readPulses(LEFT);
+
+    // cmd------ 
+
+    float angular_speed_left = cinematic_left(linear,angular,GAIN); //wheel [rad/s]
+
+    rpm_left = angular2rpm(angular_speed_left);// [RPM]
+    float rpm_left_com_rampa = rampa(rpm_left, 200, LEFT);
+    // rpm_left =  saturation(rpm_left,800);
+
+    // float controled_RPM_left = rpm_left;
+    float controled_RPM_left = esquerda_controler.output(rpm_left, rpm_encoder_read_left);
+    // float controled_RPM_left = esquerda_controler.output(rpm_left,rpm_encoder_read_left);
+
+
+    //------------------------------RIGHT-------------------------------------------
+
+    //status -- encoder 
+
+    double angle_encoder_read_right = encoder.readAngle(RIGHT);
+
+    double rpm_encoder_read_right = encoder.readRPM(RIGHT);
+    encoderRightFilter.in(rpm_encoder_read_right);
+    rpm_encoder_read_right = encoderRightFilter.out();
+
+    double ticks_encoder_read_right = encoder.readPulses(RIGHT);
+
+    //cmd -- 
+
+    float angular_speed_right = cinematic_right(linear,angular,GAIN); //wheel [RAD/S]
+
+    rpm_right = angular2rpm(angular_speed_right);   // [RPM]
+    float rpm_right_com_rampa = rampa(rpm_right, 200, RIGHT); //not used
+
+    float controled_RPM_right = direita_controler.output(rpm_right, rpm_encoder_read_right); //not used
+
+  //----------------debug------------------------------
+    if(debug){
+      rpm = getRPMsetpoint();
+      rpm_controled = direita_controler.output(rpm,rpm_encoder_read_right);
+      write2motor(rpm_controled,2);
+    //write2motor(rpm,2);
+    }
+  //--------------------------execute-----------------
+
+    if(!debug){
+    write2motors(controled_RPM_left,controled_RPM_right);
+    }
+
   delay(100);
   RCCHECK(rclc_executor_spin_some(&executor, RCL_MS_TO_NS(100)));
 }
