@@ -6,6 +6,12 @@
 #include "cinematic.h"
 #include "power.h"
 
+//TODO 
+//stil need to add some topics 
+//divide task in two cores 
+// write docs 
+
+
 #include "encoder.h"
 Encoder encoder(34, 35, 39,36);
 
