@@ -40,13 +40,7 @@ float getRPMsetpoint(){
     return cmd_rpm; 
 }
 
-float getLinear(){
-    return speed_linear;
-}
 
-float getAngular(){
-    return speed_angular;
-}
 
 // //return left wheel speed in radians/sec 
 // float cinematic_left(float linear, float angular,float gain){

@@ -10,10 +10,13 @@
 
 #include "config.h"
 
+#include <std_msgs/msg/int32.h>
+
+rcl_publisher_t ticks_right_t;
+std_msgs__msg__Int32 ticks_right_m;
 
 
 #include <geometry_msgs/msg/twist.h>
-
 
 rcl_subscription_t subscriber;
 geometry_msgs__msg__Twist msg;
@@ -78,8 +81,30 @@ void init_ros(){
     &node,
     ROSIDL_GET_MSG_TYPE_SUPPORT(geometry_msgs, msg, Twist),
     cmd_vel_topic));
+  
+  RCCHECK(rclc_publisher_init_default(
+    &ticks_right_t,
+    &node,
+    ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Int32),
+    ticks_right_topic));
+
 
   // create executor
   RCCHECK(rclc_executor_init(&executor, &support.context, 1, &allocator));
   RCCHECK(rclc_executor_add_subscription(&executor, &subscriber, &msg, &subscription_callback, ON_NEW_DATA));
 }
+
+
+void ros_loop(float speed_right,               float speed_left,
+              double angle_encoder_read_left,  double angle_encoder_read_right,
+              double rpm_encoder_read_left ,   double rpm_encoder_read_right,
+              double ticks_encoder_read_left,  double ticks_encoder_read_right, 
+              float rpm_controled,             float control_output_left, 
+              float control_output_right){
+
+              ticks_right_m.data =  ticks_encoder_read_right;
+
+              RCSOFTCHECK(rcl_publish(&ticks_right_t, &ticks_right_m, NULL));
+
+
+              }

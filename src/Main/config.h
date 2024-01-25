@@ -1,5 +1,35 @@
 #include <Arduino.h>
 
+// Subscribers ----------------------------------
+#define cmd_wheels_topic "cmd_wheels"
+#define cmd_rpm_topic "cmd/rpm"
+#define cmd_vel_topic "cmd_vel/safe"
+#define debug_control_status_topic "power/debug/control/status"
+// #define cmd_led_strip_topic "cmd/led_strip/color"
+
+//Publisher -------------------------------------
+#define pwm_right_topic "power/status/pwm/right"
+#define pwm_left_topic "power/status/pwm/left"
+
+#define angular_speed_right_topic "power/status/speed/angular/right"
+#define angular_speed_left_topic "power/status/speed/angular/left"
+
+#define rpm_speed_right_topic "power/status/speed/rpm/right"
+#define rpm_speed_left_topic "power/status/speed/rpm/left"
+
+#define ticks_left_topic "power/status/distance/ticks/left"
+#define ticks_right_topic "power/status/distance/ticks/right"
+
+#define seted_rpm_left_topic "power/status/seted/speed/rpm/left"
+#define seted_rpm_right_topic "power/status/seted/speed/rpm/right"
+
+#define vel_control_left_topic "power/status/speed/control/left"
+#define vel_control_right_topic "power/status/speed/control/right"
+
+//debug
+#define rpm_controled_topic "power/status/debug/controler/rpm"
+#define pwm_debug_topic "power/status/debug/pwm"
+
 
 
 

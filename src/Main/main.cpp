@@ -1,11 +1,12 @@
-
+#include "micro_ros.h"
+#include <Arduino.h>
 #include <Main/config.h>
-#include <Main/ros_com.h>
 #include <Main/controler.h>
-
-#include "MedianFilter.h"
 #include "rampa.h"
 #include "encoder.h"
+#include "MedianFilter.h"
+#include "cinematic.h"
+#include "power.h"
 
 Encoder encoder(34, 35, 39,36);
 
@@ -15,11 +16,6 @@ MedianFilter encoderLeftFilter(33,0);
 #include "controler.h"
 Controler  esquerda_controler(1, 0, 0);  //(p,i,d)
 Controler  direita_controler(1, 0, 0);  //(p,i,d) ->0.4
-
-// Controler  esquerda_controler(2, 0.5, 1);  //(p,i,d)
-// Controler  direita_controler(2, 0.5, 1);  //(p,i,d) ->0.4
-
-// p -> TEM QUE SER MENOR QUE 1, i= 20
 
 const int ACC = 50 ;
 // const int GAIN = 1 ;
@@ -37,29 +33,22 @@ float rpm_controled = 0;
 float controled_RPM_right;
 float controled_RPM_left ;
 
-//bool debug = false;
 
-void setup() { 
-  ros_init();
+
+
+
+void setup() {
+  init_ros();
   encoder.setup();
+
 }
 
-void loop() 
-{   
-    //add conection protection 
-     if(!rosConnected(nh,_connect)){
-
-      write2motors( 0,0);
-      digitalWrite(2,LOW);
-    
-    }
-
-    digitalWrite(2,HIGH);
+void loop() {
 
     float linear = getLinear();//robot
     float angular = getAngular();//robot
 
-    debug = debugControl();
+    // debug = debugControl();
 
     //---------------------LEFT-------------------------------------------
     
@@ -78,7 +67,7 @@ void loop()
     float angular_speed_left = cinematic_left(linear,angular,GAIN); //wheel [rad/s]
 
     rpm_left = angular2rpm(angular_speed_left);// [RPM]
-    float rpm_left_com_rampa = rampa(rpm_left, 200, LEFT);
+    float rpm_left_com_rampa = rampa(rpm_left, 10, LEFT);
     // rpm_left =  saturation(rpm_left,800);
 
     // float controled_RPM_left = rpm_left;
@@ -103,7 +92,7 @@ void loop()
     float angular_speed_right = cinematic_right(linear,angular,GAIN); //wheel [RAD/S]
 
     rpm_right = angular2rpm(angular_speed_right);   // [RPM]
-    float rpm_right_com_rampa = rampa(rpm_right, 200, RIGHT); //not used
+    float rpm_right_com_rampa = rampa(rpm_right, 10, RIGHT); //not used
 
     float controled_RPM_right = direita_controler.output(rpm_right, rpm_encoder_read_right); //not used
 
@@ -120,13 +109,13 @@ void loop()
     write2motors(controled_RPM_left,controled_RPM_right);
     }
 
-  
+ros_loop(      0,              0,
+              0,  0,
+              0 ,  0,
+              0,   ticks_encoder_read_right, 
+             0,            0, 
+             0);
 
-    ros_loop(angular_speed_right,        angular_speed_left,
-             angle_encoder_read_left,    angle_encoder_read_right,
-             rpm_encoder_read_left ,     rpm_encoder_read_right,
-             ticks_encoder_read_left,    ticks_encoder_read_right,
-             rpm_controled,              
-             controled_RPM_left,         controled_RPM_right);
-    nh.spinOnce();
+
+  RCCHECK(rclc_executor_spin_some(&executor, RCL_MS_TO_NS(100)));
 }

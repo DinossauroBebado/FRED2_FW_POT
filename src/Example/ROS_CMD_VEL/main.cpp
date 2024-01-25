@@ -17,11 +17,6 @@ MedianFilter encoderLeftFilter(33,0);
 Controler  esquerda_controler(1, 0, 0);  //(p,i,d)
 Controler  direita_controler(1, 0, 0);  //(p,i,d) ->0.4
 
-// Controler  esquerda_controler(2, 0.5, 1);  //(p,i,d)
-// Controler  direita_controler(2, 0.5, 1);  //(p,i,d) ->0.4
-
-// p -> TEM QUE SER MENOR QUE 1, i= 20
-
 const int ACC = 50 ;
 // const int GAIN = 1 ;
 const int GAIN = 10 ;
@@ -72,7 +67,7 @@ void loop() {
     float angular_speed_left = cinematic_left(linear,angular,GAIN); //wheel [rad/s]
 
     rpm_left = angular2rpm(angular_speed_left);// [RPM]
-    float rpm_left_com_rampa = rampa(rpm_left, 200, LEFT);
+    float rpm_left_com_rampa = rampa(rpm_left, 10, LEFT);
     // rpm_left =  saturation(rpm_left,800);
 
     // float controled_RPM_left = rpm_left;
@@ -97,7 +92,7 @@ void loop() {
     float angular_speed_right = cinematic_right(linear,angular,GAIN); //wheel [RAD/S]
 
     rpm_right = angular2rpm(angular_speed_right);   // [RPM]
-    float rpm_right_com_rampa = rampa(rpm_right, 200, RIGHT); //not used
+    float rpm_right_com_rampa = rampa(rpm_right, 10, RIGHT); //not used
 
     float controled_RPM_right = direita_controler.output(rpm_right, rpm_encoder_read_right); //not used
 
@@ -114,6 +109,5 @@ void loop() {
     write2motors(controled_RPM_left,controled_RPM_right);
     }
 
-  delay(100);
   RCCHECK(rclc_executor_spin_some(&executor, RCL_MS_TO_NS(100)));
 }

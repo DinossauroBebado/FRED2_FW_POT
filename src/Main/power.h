@@ -1,6 +1,6 @@
 
-#include <Main/motor.h>
-#include <Main/tools.h>
+#include "motor.h"
+#include "tools.h"
 
 // fred(linear(m/s),angular(rad/s)) -> |cinematic| -> wheel(angular(rad/s)) -> |angular2rpm| -> wheel(angular(rpm)) -> |rpm2pwm| -> wheel(pwm)
 
