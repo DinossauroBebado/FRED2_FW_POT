@@ -3,13 +3,13 @@
 #include <Main/config.h>
 #include <Main/controler.h>
 #include "rampa.h"
-#include "encoder.h"
-#include "MedianFilter.h"
 #include "cinematic.h"
 #include "power.h"
 
+#include "encoder.h"
 Encoder encoder(34, 35, 39,36);
 
+#include "MedianFilter.h"
 MedianFilter encoderRightFilter(33,0);
 MedianFilter encoderLeftFilter(33,0);
 
@@ -109,12 +109,12 @@ void loop() {
     write2motors(controled_RPM_left,controled_RPM_right);
     }
 
-ros_loop(      0,              0,
-              0,  0,
-              0 ,  0,
-              0,   ticks_encoder_read_right, 
-             0,            0, 
-             0);
+ros_loop(      angular_speed_right,       angular_speed_left,
+               angle_encoder_read_left,   angle_encoder_read_right,
+               rpm_encoder_read_left ,    rpm_encoder_read_right,
+               ticks_encoder_read_left,   ticks_encoder_read_right, 
+               rpm_controled,              controled_RPM_left, 
+               controled_RPM_left);
 
 
   RCCHECK(rclc_executor_spin_some(&executor, RCL_MS_TO_NS(100)));
