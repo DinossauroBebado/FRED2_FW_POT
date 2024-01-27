@@ -71,7 +71,7 @@ void error_loop(){
   for (int i = 0; i<10; i++)
   {
     digitalWrite(LED_PIN, !digitalRead(LED_PIN));
-    delay(100);
+    vTaskDelay(pdMS_TO_TICKS(100));
   }
   ESP.restart();
 }
@@ -195,14 +195,6 @@ void ros_loop(float speed_right,               float speed_left,
 
               rpm_speed_right_m.data = rpm_encoder_read_right;
               RCSOFTCHECK(rcl_publish(&rpm_speed_right_t, &rpm_speed_right_m, NULL));
-
-
-
-
-
-
-
-
 
 
               }
