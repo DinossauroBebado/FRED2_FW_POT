@@ -122,6 +122,6 @@ ros_loop(      angular_speed_right,       angular_speed_left,
                rpm_controled,              controled_RPM_left, 
                controled_RPM_left);
 
-
+  
   RCCHECK(rclc_executor_spin_some(&executor, RCL_MS_TO_NS(100)));
 }

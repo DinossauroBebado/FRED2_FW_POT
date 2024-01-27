@@ -68,10 +68,12 @@ float speed_angular ;
 
 
 void error_loop(){
-  while(1){
+  for (int i = 0; i<10; i++)
+  {
     digitalWrite(LED_PIN, !digitalRead(LED_PIN));
     delay(100);
   }
+  ESP.restart();
 }
 
 //twist message cb
