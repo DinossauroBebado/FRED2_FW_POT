@@ -12,8 +12,8 @@
 TaskHandle_t taskWriteHandle = NULL;
 TaskHandle_t taskReadHandle = NULL;
 
-void vTaskWrite(void *pvParameters);
-void vTaskRead(void *pvParameters);
+void vTaskSub(void *pvParameters);
+void vTaskPub(void *pvParameters);
 
 #include "freertos/semphr.h"
 
@@ -71,21 +71,22 @@ void setup() {
   // Criação do semáforo
   encoderMutex = xSemaphoreCreateMutex();
   // Criação das Tasks
-  BaseType_t result = xTaskCreatePinnedToCore(vTaskWrite, "vTaskWrite", configMINIMAL_STACK_SIZE+8192, NULL, 2, &taskWriteHandle, PRO_CPU_NUM);
+  BaseType_t result = xTaskCreatePinnedToCore(vTaskSub, "vTaskSub", configMINIMAL_STACK_SIZE+8192, NULL, 2, &taskWriteHandle, PRO_CPU_NUM);
   if (result != pdPASS) {
-   //Serial.println("Erro ao criar vTaskWrite!");
+   //Serial.println("Erro ao criar vTaskSub!");
   }
-  result = xTaskCreatePinnedToCore(vTaskRead, "vTaskRead", configMINIMAL_STACK_SIZE+8192, NULL, 2, &taskReadHandle, APP_CPU_NUM);
+  result = xTaskCreatePinnedToCore(vTaskPub, "vTaskPub", configMINIMAL_STACK_SIZE+8192, NULL, 2, &taskReadHandle, APP_CPU_NUM);
   if (result != pdPASS) {
-   //Serial.println("Erro ao criar vTaskRead!");
+   //Serial.println("Erro ao criar vTaskPub!");
   }
 }
 
 void loop() {
-  RCCHECK(rclc_executor_spin_some(&executor, RCL_MS_TO_NS(100)));
+  // RCCHECK(rclc_executor_spin_some(&executor, RCL_MS_TO_NS(100)));
+  vTaskDelay(10);
 }
 
-void vTaskWrite(void *pvParameters)
+void vTaskSub(void *pvParameters)
 {
   while(1)
   {
@@ -156,24 +157,27 @@ void vTaskWrite(void *pvParameters)
       }
       xSemaphoreGive(encoderMutex);
     }
+    vTaskDelay(10/portTICK_RATE_MS);
     RCCHECK(rclc_executor_spin_some(&executor, RCL_MS_TO_NS(100)));
-    taskYIELD();
   }
 }
 
-void vTaskRead(void *pvParameters)
+void vTaskPub(void *pvParameters)
 {
-  if (xSemaphoreTake(encoderMutex, portMAX_DELAY) == pdTRUE) 
+  while(1)
   {
-    ros_loop(    angular_speed_right,       angular_speed_left,
-                angle_encoder_read_left,   angle_encoder_read_right,
-                rpm_encoder_read_left ,    rpm_encoder_read_right,
-                ticks_encoder_read_left,   ticks_encoder_read_right, 
-                rpm_controled,              controled_RPM_left, 
-                controled_RPM_left);
-    xSemaphoreGive(encoderMutex);
-    // Em qualquer ponto do código para verificar o uso de heap
+    if (xSemaphoreTake(encoderMutex, portMAX_DELAY) == pdTRUE) 
+    {
+      ros_loop(    angular_speed_right,       angular_speed_left,
+                  angle_encoder_read_left,   angle_encoder_read_right,
+                  rpm_encoder_read_left ,    rpm_encoder_read_right,
+                  ticks_encoder_read_left,   ticks_encoder_read_right, 
+                  rpm_controled,              controled_RPM_left, 
+                  controled_RPM_left);
+      xSemaphoreGive(encoderMutex);
+      // Em qualquer ponto do código para verificar o uso de heap
+    }
+    RCCHECK(rclc_executor_spin_some(&executor, RCL_MS_TO_NS(100)));
+    vTaskDelay(10/portTICK_RATE_MS);
   }
-  RCCHECK(rclc_executor_spin_some(&executor, RCL_MS_TO_NS(100)));
-  taskYIELD();
 }
