@@ -9,15 +9,15 @@
 #include "freertos/task.h"
 #include "freertos/FreeRTOSConfig.h"
 
-TaskHandle_t taskWriteHandle = NULL;
-TaskHandle_t taskReadHandle = NULL;
+TaskHandle_t taskSubHandle = NULL;
+TaskHandle_t taskPubHandle = NULL;
 
 void vTaskSub(void *pvParameters);
 void vTaskPub(void *pvParameters);
 
 #include "freertos/semphr.h"
 
-SemaphoreHandle_t encoderMutex;
+SemaphoreHandle_t dataMutex;
 //TODO 
 //stil need to add some topics 
 //divide task in two cores 
@@ -69,13 +69,13 @@ void setup() {
   init_ros();
   encoder.setup();
   // Criação do semáforo
-  encoderMutex = xSemaphoreCreateMutex();
+  dataMutex = xSemaphoreCreateMutex();
   // Criação das Tasks
-  BaseType_t result = xTaskCreatePinnedToCore(vTaskSub, "vTaskSub", configMINIMAL_STACK_SIZE+8192, NULL, 2, &taskWriteHandle, PRO_CPU_NUM);
+  BaseType_t result = xTaskCreatePinnedToCore(vTaskSub, "vTaskSub", configMINIMAL_STACK_SIZE+8192, NULL, 2, &taskSubHandle, PRO_CPU_NUM);
   if (result != pdPASS) {
    //Serial.println("Erro ao criar vTaskSub!");
   }
-  result = xTaskCreatePinnedToCore(vTaskPub, "vTaskPub", configMINIMAL_STACK_SIZE+8192, NULL, 2, &taskReadHandle, APP_CPU_NUM);
+  result = xTaskCreatePinnedToCore(vTaskPub, "vTaskPub", configMINIMAL_STACK_SIZE+8192, NULL, 2, &taskPubHandle, APP_CPU_NUM);
   if (result != pdPASS) {
    //Serial.println("Erro ao criar vTaskPub!");
   }
@@ -94,7 +94,7 @@ void vTaskSub(void *pvParameters)
       float linear = getLinear();//robot
       float angular = getAngular();//robot
     // Adquira o semáforo antes de acessar as variáveis globais
-    if (xSemaphoreTake(encoderMutex, portMAX_DELAY) == pdTRUE) {
+    if (xSemaphoreTake(dataMutex, portMAX_DELAY) == pdTRUE) {
 
       // debug = debugControl();
 
@@ -156,7 +156,7 @@ void vTaskSub(void *pvParameters)
       if(!debug){
       write2motors(controled_RPM_left,controled_RPM_right);
       }
-      xSemaphoreGive(encoderMutex);
+      xSemaphoreGive(dataMutex);
     }
     vTaskDelay(10/portTICK_RATE_MS);
     RCCHECK(rclc_executor_spin_some(&executor, RCL_MS_TO_NS(100)));
@@ -167,7 +167,7 @@ void vTaskPub(void *pvParameters)
 {
   while(1)
   {
-    if (xSemaphoreTake(encoderMutex, portMAX_DELAY) == pdTRUE) 
+    if (xSemaphoreTake(dataMutex, portMAX_DELAY) == pdTRUE) 
     {
       ros_loop(    angular_speed_right,       angular_speed_left,
                   angle_encoder_read_left,   angle_encoder_read_right,
@@ -175,7 +175,7 @@ void vTaskPub(void *pvParameters)
                   ticks_encoder_read_left,   ticks_encoder_read_right, 
                   rpm_controled,              controled_RPM_left, 
                   controled_RPM_left);
-      xSemaphoreGive(encoderMutex);
+      xSemaphoreGive(dataMutex);
       // Em qualquer ponto do código para verificar o uso de heap
     }
     RCCHECK(rclc_executor_spin_some(&executor, RCL_MS_TO_NS(100)));
