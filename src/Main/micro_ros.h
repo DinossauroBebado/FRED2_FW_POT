@@ -197,12 +197,4 @@ void ros_loop(float speed_right,               float speed_left,
               RCSOFTCHECK(rcl_publish(&rpm_speed_right_t, &rpm_speed_right_m, NULL));
 
 
-
-
-
-
-
-
-
-
               }
