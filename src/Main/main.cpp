@@ -90,10 +90,11 @@ void vTaskSub(void *pvParameters)
 {
   while(1)
   {
-     // Adquira o semáforo antes de acessar as variáveis globais
-    if (xSemaphoreTake(encoderMutex, portMAX_DELAY) == pdTRUE) {
+    
       float linear = getLinear();//robot
       float angular = getAngular();//robot
+    // Adquira o semáforo antes de acessar as variáveis globais
+    if (xSemaphoreTake(encoderMutex, portMAX_DELAY) == pdTRUE) {
 
       // debug = debugControl();
 
