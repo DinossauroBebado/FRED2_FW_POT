@@ -5,6 +5,7 @@
 #include "rampa.h"
 #include "cinematic.h"
 #include "power.h"
+#include "odometry.h"
 
 //TODO 
 //stil need to add some topics 
@@ -102,6 +103,9 @@ void loop() {
 
     float controled_RPM_right = direita_controler.output(rpm_right, rpm_encoder_read_right); //not used
 
+    struct odom_r odometry;
+    odometry = odom(ticks_encoder_read_left, ticks_encoder_read_right, 0);
+
   //----------------debug------------------------------
     if(debug){
       rpm = getRPMsetpoint();
@@ -120,7 +124,7 @@ void loop() {
                rpm_encoder_read_left ,    rpm_encoder_read_right,
                ticks_encoder_read_left,   ticks_encoder_read_right, 
                rpm_controled,              controled_RPM_left, 
-               controled_RPM_left);
+               controled_RPM_left, odometry.odom_x, odometry.odom_y);
 
   
   RCCHECK(rclc_executor_spin_some(&executor, RCL_MS_TO_NS(100)));

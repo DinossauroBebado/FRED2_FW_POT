@@ -9,6 +9,7 @@
 #include <rclc/executor.h>
 #include "config.h"
 #include <std_msgs/msg/int32.h>
+#include <geometry_msgs/msg/pose2_d.h>
 #include <geometry_msgs/msg/twist.h>
 
 
@@ -54,6 +55,10 @@ std_msgs__msg__Int32 vel_control_left_m;
 
 rcl_publisher_t vel_control_right_t;
 std_msgs__msg__Int32 vel_control_right_m;
+
+rcl_publisher_t pose_publisher;
+geometry_msgs__msg__Pose2D pose_msg;
+
 
 
 
@@ -116,7 +121,12 @@ void init_ros(){
     &node,
     ROSIDL_GET_MSG_TYPE_SUPPORT(geometry_msgs, msg, Twist),
     cmd_vel_topic));
-
+  //create publisher for geometry msgs
+  RCCHECK(rclc_publisher_init_default(
+      &pose_publisher,
+      &node,
+      ROSIDL_GET_MSG_TYPE_SUPPORT(geometry_msgs, msg, Pose2D),
+      pose_topic));
   //create publisher for encoder ticks right 
   RCCHECK(rclc_publisher_init_default(
     &ticks_right_t,
@@ -160,8 +170,10 @@ void init_ros(){
   ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Int32),
   rpm_speed_right_topic));
 
-
-
+  // Initialize the Pose2D message
+  pose_msg.x = 0.0;
+  pose_msg.y = 0.0;
+  pose_msg.theta = 0.0;
 
   // create executor
   RCCHECK(rclc_executor_init(&executor, &support.context, 1, &allocator));
@@ -174,7 +186,7 @@ void ros_loop(float speed_right,               float speed_left,
               double rpm_encoder_read_left ,   double rpm_encoder_read_right,
               double ticks_encoder_read_left,  double ticks_encoder_read_right, 
               float rpm_controled,             float control_output_left, 
-              float control_output_right){
+              float control_output_right, float x, float y){
 
               ticks_right_m.data =  ticks_encoder_read_right;
               RCSOFTCHECK(rcl_publish(&ticks_right_t, &ticks_right_m, NULL));
@@ -196,5 +208,9 @@ void ros_loop(float speed_right,               float speed_left,
               rpm_speed_right_m.data = rpm_encoder_read_right;
               RCSOFTCHECK(rcl_publish(&rpm_speed_right_t, &rpm_speed_right_m, NULL));
 
-
+              pose_msg.x = x;
+              pose_msg.y = y;
+              pose_msg.theta = 0;
+              // Publish Pose2D message
+              RCSOFTCHECK(rcl_publish(&pose_publisher, &pose_msg, NULL));
               }

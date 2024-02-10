@@ -30,6 +30,8 @@
 #define rpm_controled_topic "power/status/debug/controler/rpm"
 #define pwm_debug_topic "power/status/debug/pwm"
 
+#define pose_topic "power/status/pose"
+
 
 
 
