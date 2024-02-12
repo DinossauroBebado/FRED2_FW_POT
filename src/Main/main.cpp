@@ -65,7 +65,7 @@ volatile float angular_speed_right;
 
 
 void setup() {
-  //Serial.begin(115200);
+  //Serial.begin(115200); // A Serial é iniciada no init_ros
   init_ros();
   encoder.setup();
   // Criação do semáforo
@@ -83,7 +83,7 @@ void setup() {
 
 void loop() {
   // RCCHECK(rclc_executor_spin_some(&executor, RCL_MS_TO_NS(100)));
-  vTaskDelay(10);
+  vTaskDelay(pdMS_TO_TICKS(1000));
 }
 
 void vTaskSub(void *pvParameters)
@@ -91,24 +91,10 @@ void vTaskSub(void *pvParameters)
   while(1)
   {
     
-      float linear = getLinear();//robot
-      float angular = getAngular();//robot
+    float linear = getLinear();//robot
+    float angular = getAngular();//robot
     // Adquira o semáforo antes de acessar as variáveis globais
     if (xSemaphoreTake(dataMutex, portMAX_DELAY) == pdTRUE) {
-
-      // debug = debugControl();
-
-      //---------------------LEFT-------------------------------------------
-      
-      // status -------encoder 
-      angle_encoder_read_left  = encoder.readAngle(LEFT);
-
-      rpm_encoder_read_left = encoder.readRPM(LEFT);
-      encoderLeftFilter.in(rpm_encoder_read_left);
-
-      rpm_encoder_read_left = encoderLeftFilter.out();
-
-      ticks_encoder_read_left = encoder.readPulses(LEFT);
 
       // cmd------ 
 
@@ -119,21 +105,8 @@ void vTaskSub(void *pvParameters)
       // rpm_left =  saturation(rpm_left,800);
 
       // float controled_RPM_left = rpm_left;
-      float controled_RPM_left = esquerda_controler.output(rpm_left, rpm_encoder_read_left);
+      controled_RPM_left = esquerda_controler.output(rpm_left, rpm_encoder_read_left);
       // float controled_RPM_left = esquerda_controler.output(rpm_left,rpm_encoder_read_left);
-
-
-      //------------------------------RIGHT-------------------------------------------
-
-      //status -- encoder 
-
-      angle_encoder_read_right = encoder.readAngle(RIGHT);
-
-      rpm_encoder_read_right = encoder.readRPM(RIGHT);
-      encoderRightFilter.in(rpm_encoder_read_right);
-      rpm_encoder_read_right = encoderRightFilter.out();
-
-      ticks_encoder_read_right = encoder.readPulses(RIGHT);
 
       //cmd -- 
 
@@ -142,23 +115,24 @@ void vTaskSub(void *pvParameters)
       rpm_right = angular2rpm(angular_speed_right);   // [RPM]
       float rpm_right_com_rampa = rampa(rpm_right, 10, RIGHT); //not used
 
-      float controled_RPM_right = direita_controler.output(rpm_right, rpm_encoder_read_right); //not used
+      controled_RPM_right = direita_controler.output(rpm_right, rpm_encoder_read_right); //not used
 
-    //----------------debug------------------------------
+            //----------------debug------------------------------
       if(debug){
         rpm = getRPMsetpoint();
         rpm_controled = direita_controler.output(rpm,rpm_encoder_read_right);
         write2motor(rpm_controled,2);
-      //write2motor(rpm,2);
+        //write2motor(rpm,2);
       }
       //--------------------------execute-----------------
 
       if(!debug){
-      write2motors(controled_RPM_left,controled_RPM_right);
+        write2motors(controled_RPM_left,controled_RPM_right);
       }
+
       xSemaphoreGive(dataMutex);
     }
-    vTaskDelay(10/portTICK_RATE_MS);
+    vTaskDelay(pdMS_TO_TICKS(10));
     RCCHECK(rclc_executor_spin_some(&executor, RCL_MS_TO_NS(100)));
   }
 }
@@ -167,18 +141,44 @@ void vTaskPub(void *pvParameters)
 {
   while(1)
   {
+    // debug = debugControl();
+
+    //---------------------LEFT-------------------------------------------
+    
+    // status -------encoder 
+    angle_encoder_read_left  = encoder.readAngle(LEFT);
+
+    rpm_encoder_read_left = encoder.readRPM(LEFT);
+    encoderLeftFilter.in(rpm_encoder_read_left);
+
+    rpm_encoder_read_left = encoderLeftFilter.out();
+
+    ticks_encoder_read_left = encoder.readPulses(LEFT);
+
+
+    //------------------------------RIGHT-------------------------------------------
+
+    //status -- encoder 
+
+    angle_encoder_read_right = encoder.readAngle(RIGHT);
+
+    rpm_encoder_read_right = encoder.readRPM(RIGHT);
+    encoderRightFilter.in(rpm_encoder_read_right);
+    rpm_encoder_read_right = encoderRightFilter.out();
+
+    ticks_encoder_read_right = encoder.readPulses(RIGHT);
+
     if (xSemaphoreTake(dataMutex, portMAX_DELAY) == pdTRUE) 
     {
-      ros_loop(    angular_speed_right,       angular_speed_left,
+      ros_loop(   angular_speed_right,       angular_speed_left,
                   angle_encoder_read_left,   angle_encoder_read_right,
                   rpm_encoder_read_left ,    rpm_encoder_read_right,
                   ticks_encoder_read_left,   ticks_encoder_read_right, 
-                  rpm_controled,              controled_RPM_left, 
-                  controled_RPM_left);
+                  rpm_controled,             controled_RPM_left, 
+                  controled_RPM_right);
       xSemaphoreGive(dataMutex);
-      // Em qualquer ponto do código para verificar o uso de heap
     }
     RCCHECK(rclc_executor_spin_some(&executor, RCL_MS_TO_NS(100)));
-    vTaskDelay(10/portTICK_RATE_MS);
+    vTaskDelay(pdMS_TO_TICKS(10));
   }
 }
