@@ -11,6 +11,12 @@
 #include <std_msgs/msg/int32.h>
 #include <geometry_msgs/msg/twist.h>
 
+// Defina o intervalo de timeout em milissegundos
+#define TIMEOUT_INTERVAL_MS 1000
+
+// Variável para armazenar o último tempo em que cmd_vel foi recebido
+unsigned long last_cmd_vel_time = 0;
+
 
 rcl_subscription_t cmd_vel_subscriber;
 geometry_msgs__msg__Twist msg;
@@ -82,6 +88,9 @@ void subscription_callback(const void *msgin) {
   // if velocity in x direction is 0 turn off LED, if 1 turn on LED
   speed_linear = msg->linear.x ; 
   speed_angular = msg->angular.z;
+
+  // Atualiza o tempo do último comando recebido
+  last_cmd_vel_time = millis();
 //   digitalWrite(LED_PIN, (msg->linear.x == 0) ? LOW : HIGH);
 }
 
@@ -92,6 +101,18 @@ float getLinear(){
 float getAngular(){
     return speed_angular;
 }
+
+// Função para verificar e zerar as velocidades se o timeout ocorrer
+void check_cmd_vel_timeout() {
+  unsigned long current_time = millis();
+  // Verifica se o tempo decorrido desde o último comando recebido excede o intervalo de timeout
+  if (current_time - last_cmd_vel_time > TIMEOUT_INTERVAL_MS) {
+    // Zera as velocidades linear e angular
+    speed_linear = 0;
+    speed_angular = 0;
+  }
+}
+
 
 
 void init_ros(){
@@ -196,5 +217,7 @@ void ros_loop(float speed_right,               float speed_left,
               rpm_speed_right_m.data = rpm_encoder_read_right;
               RCSOFTCHECK(rcl_publish(&rpm_speed_right_t, &rpm_speed_right_m, NULL));
 
+              // Verifica o timeout do comando cmd_vel
+              check_cmd_vel_timeout();
 
               }
