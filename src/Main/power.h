@@ -19,6 +19,8 @@ int pwm_right = 0 ;
 int pwm_left = 0  ; 
 int pwm_motor = 0;
 
+int OFFSET = 130;  //Offset fix the diference of velocity between front and back wheels 
+
 void stop(motor motor){
   digitalWrite(motor.In_A, HIGH);  
   digitalWrite(motor.In_B, HIGH);
@@ -71,16 +73,23 @@ void write_PWM(motor motor, int vel){
 
 
 
-void write2motors(int rpm_left, int rpm_right){
+void write2motors(int rpm_left, int rpm_right) {
 
   pwm_left  = rpm2pwm(rpm_left);
   pwm_right = rpm2pwm(rpm_right);
 
-  write_PWM(motor1,pwm_right); 
-  write_PWM(motor2,pwm_right); 
-  write_PWM(motor3,pwm_left); 
-  write_PWM(motor4,pwm_left); 
+  int front_gain;  // Declare front_gain outside the if-else blocks
 
+  if (pwm_left >= OFFSET && pwm_right >= OFFSET) {
+    front_gain = -130;
+  } else {
+    front_gain = 0;
+  }
+
+  write_PWM(motor1, pwm_right + front_gain); 
+  write_PWM(motor2, pwm_right); 
+  write_PWM(motor3, pwm_left); 
+  write_PWM(motor4, pwm_left + front_gain); 
 }
 
 

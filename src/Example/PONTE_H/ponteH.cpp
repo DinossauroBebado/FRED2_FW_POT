@@ -1,78 +1,51 @@
 #include "Arduino.h"
-
-#define S1_M1 15
-#define S2_M1 18
-#define PWM_M1 12
-
-#define S1_M2 23
-#define S2_M2 19
-#define PWM_M2 25 
-
-#define S1_M3 21
-#define S2_M3 22
-#define PWM_M3 32
-
-#define S1_M4 4
-#define S2_M4 5
-#define PWM_M4 27
-
-
-const int freq = 1000;
-
-int vel = 100;
-
-const int ledChannel1 = 0;
-const int ledChannel2 = 1;
-const int ledChannel3 = 2;
-const int ledChannel4 = 3;
-
-const int resolution = 8;
+#include <Main/config.h>
 
 void setup()
 {
-  pinMode(S1_M1, OUTPUT); 
-  pinMode(S2_M1, OUTPUT); 
+  pinMode(M1_IN1, OUTPUT); 
+  pinMode(M1_IN2, OUTPUT); 
   
-  pinMode(S1_M2, OUTPUT); 
-  pinMode(S2_M2, OUTPUT); 
+  pinMode(M2_IN1, OUTPUT); 
+  pinMode(M2_IN2, OUTPUT); 
 
-  pinMode(S1_M3, OUTPUT); 
-  pinMode(S2_M3, OUTPUT); 
+  pinMode(M3_IN1, OUTPUT); 
+  pinMode(M3_IN2, OUTPUT); 
 
-  pinMode(S1_M4, OUTPUT); 
-  pinMode(S2_M4, OUTPUT); 
+  pinMode(M4_IN1, OUTPUT); 
+  pinMode(M4_IN2, OUTPUT); 
 
-  pinMode(PWM_M1, OUTPUT); 
-  pinMode(PWM_M2, OUTPUT); 
-  pinMode(PWM_M3, OUTPUT); 
-  pinMode(PWM_M4, OUTPUT); 
+  pinMode(M1_PWM, OUTPUT); 
+  pinMode(M2_PWM, OUTPUT); 
+  pinMode(M3_PWM, OUTPUT); 
+  pinMode(M4_PWM, OUTPUT); 
 
-  ledcSetup(ledChannel1, freq, resolution);
-  ledcSetup(ledChannel2, freq, resolution);
-  ledcSetup(ledChannel3, freq, resolution);
-  ledcSetup(ledChannel4, freq, resolution);
+  ledcSetup(CANAL_M1, FREQUENCIA, 10);
+  ledcSetup(CANAL_M2, FREQUENCIA, 10);
+  ledcSetup(CANAL_M3, FREQUENCIA, 10);
+  ledcSetup(CANAL_M4, FREQUENCIA, 10);
 
-  ledcAttachPin(PWM_M1, ledChannel1);
-  ledcAttachPin(PWM_M2, ledChannel2);
-  ledcAttachPin(PWM_M3, ledChannel3);
-  ledcAttachPin(PWM_M4, ledChannel4);
+  ledcAttachPin(M1_PWM, CANAL_M1);
+  ledcAttachPin(M2_PWM, CANAL_M2);
+  ledcAttachPin(M3_PWM, CANAL_M3);
+  ledcAttachPin(M4_PWM, CANAL_M4);
 
-  ledcWrite(ledChannel1, vel);
-  ledcWrite(ledChannel2, vel);
-  ledcWrite(ledChannel3, vel);
-  ledcWrite(ledChannel4, vel);
+  ledcWrite(CANAL_M1, 170);
+  ledcWrite(CANAL_M2, 300);
+  ledcWrite(CANAL_M3, 300);
+  ledcWrite(CANAL_M4, 170);
 
   //! Faz com que os motores andem pra frente
 
-  digitalWrite(S1_M1, 1); 
-  digitalWrite(S1_M2, 1); 
-  digitalWrite(S1_M3, 1); 
-  digitalWrite(S1_M4, 1); 
+  digitalWrite(M1_IN1, 1); 
+  digitalWrite(M2_IN1, 1); 
+  digitalWrite(M3_IN1, 1); 
+  digitalWrite(M4_IN1, 1); 
 
-  digitalWrite(S2_M1, 0); 
-  digitalWrite(S2_M2, 0);
-  digitalWrite(S2_M3, 0);
-  digitalWrite(S2_M4, 0);
+  digitalWrite(M1_IN2, 0); 
+  digitalWrite(M2_IN2, 0);
+  digitalWrite(M3_IN2, 0);
+  digitalWrite(M4_IN2, 0);
 
   
 }
