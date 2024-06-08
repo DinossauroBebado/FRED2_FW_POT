@@ -92,4 +92,15 @@
 #define  LED_STRIP  14
 #define NUMPIXELS   17
 
+// CHANGE THESE AS APPROPRIATE
+#define CSpin   5
+#define CLKpin  18
+#define DOpin   4
+#define PROGpin 19
+
+// OUTPUT PINS -- VERIFFFFY!!!
+#define enc_a  17
+#define enc_b  16
+#define enc_z  2
+
 #define  PWM_SATURATION_UNDER 0

@@ -30,9 +30,10 @@ void contadorVolta(){
 void setup ()
 {
   Serial.begin (115200) ;   // NOTE BAUD RATE
+  /*
   if (!enc.begin (AS5040_QUADRATURE, false, 0))  // example setting reverse sense and an offset
     Serial.println ("Error setting up AS5040");
-
+  */
   encoder.setup(); 
 
   attachInterrupt(enc_z, contadorVolta, CHANGE);
@@ -40,7 +41,7 @@ void setup ()
 
 void loop (){
     int val; 
-
+    /*
     Serial.print(val);
     Serial.print(" | ");
     Serial.print (enc.read (), HEX) ;
@@ -50,13 +51,13 @@ void loop (){
     Serial.print (enc.valid () ? "OK" : "Fault") ;
     Serial.print ("   ") ;
     Serial.println (enc.Zaxis ()) ;
-
+    */
     double pulses = encoder.readPulses();
     double rpm = encoder.readRPM();
 
     Serial.print("P: ");
     Serial.print(pulses);
     Serial.print(" RPM: ");
-    Serial.print(rpm);
+    Serial.println(rpm);
     delay (100) ;
 }
