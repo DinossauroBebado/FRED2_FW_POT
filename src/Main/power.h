@@ -9,8 +9,6 @@
 
 motor motor1(M1_IN1, M1_IN2, M1_PWM, 0);
 motor motor2(M2_IN1, M2_IN2, M2_PWM, 1);
-motor motor3(M3_IN1, M3_IN2, M3_PWM, 3);
-motor motor4(M4_IN1, M4_IN2, M4_PWM, 4);
 
 
 //Global 
@@ -86,10 +84,8 @@ void write2motors(int rpm_left, int rpm_right) {
     front_gain = 0;
   }
 
-  write_PWM(motor1, pwm_right + front_gain); 
-  write_PWM(motor2, pwm_right); 
-  write_PWM(motor3, pwm_left); 
-  write_PWM(motor4, pwm_left + front_gain); 
+  write_PWM(motor1, pwm_right); 
+  write_PWM(motor2, pwm_left); 
 }
 
 
@@ -103,12 +99,6 @@ void write2motor(int rpm,int motor){
 
     case 2:
        write_PWM(motor2,pwm_motor);
-        break;
-    case 3:
-       write_PWM(motor3,pwm_motor);
-        break;
-     case 4:
-       write_PWM(motor4,pwm_motor);
         break;
     default:
           write_PWM(motor1,pwm_motor);
