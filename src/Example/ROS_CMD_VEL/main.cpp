@@ -1,7 +1,7 @@
 #include "micro_ros.h"
 #include <Arduino.h>
-#include <Main/config.h>
-#include <Main/controler.h>
+#include <Main_Lib/config.h>
+#include <Main_Lib/controler.h>
 #include "rampa.h"
 #include "encoder.h"
 #include "MedianFilter.h"

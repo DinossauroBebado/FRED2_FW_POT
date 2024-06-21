@@ -1,24 +1,24 @@
 #include "micro_ros.h"
 #include <Arduino.h>
-#include <Main/config.h>
-#include <Main/controler.h>
-#include "rampa.h"
-#include "cinematic.h"
-#include "power.h"
+#include <Main_Lib/config.h>
+#include <Main_Lib/controler.h>
+#include <Main_Lib/rampa.h>
+#include <Main_Lib/cinematic.h>
+#include <Main_Lib/power.h>
 
 // TODO
 // stil need to add some topics
 // divide task in two cores
 //  write docs
 
-#include "encoder.h"
+#include <Main_Lib/encoder.h>
 Encoder encoder(34, 35, 39,36);
 
-#include "MedianFilter.h"
+#include <Main_Lib/MedianFilter.h>
 MedianFilter encoderRightFilter(33, 0);
 MedianFilter encoderLeftFilter(33, 0);
 
-#include "controler.h"
+#include <Main_Lib/controler.h>
 Controler esquerda_controler(1, 0, 0); //(p,i,d)
 Controler direita_controler(1, 0, 0);  //(p,i,d) ->0.4
 

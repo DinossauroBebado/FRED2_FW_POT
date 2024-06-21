@@ -7,7 +7,7 @@
 #include <rcl/error_handling.h>
 #include <rclc/rclc.h>
 #include <rclc/executor.h>
-#include "config.h"
+#include <Main_Lib/config.h>
 #include <std_msgs/msg/int32.h>
 #include <geometry_msgs/msg/twist.h>
 
@@ -17,6 +17,7 @@
 // Variável para armazenar o último tempo em que cmd_vel foi recebido
 unsigned long last_cmd_vel_time = 0;
 
+const char * namespace_ = "esp_front";
 
 rcl_subscription_t cmd_vel_subscriber;
 geometry_msgs__msg__Twist msg;
@@ -129,7 +130,7 @@ void init_ros(){
   RCCHECK(rclc_support_init(&support, 0, NULL, &allocator));
 
   // create node
-  RCCHECK(rclc_node_init_default(&node, "micro_ros_power_node", "", &support));
+  RCCHECK(rclc_node_init_default(&node, "micro_ros_power_node", namespace_, &support));
 
   // create subscriber
   RCCHECK(rclc_subscription_init_default(

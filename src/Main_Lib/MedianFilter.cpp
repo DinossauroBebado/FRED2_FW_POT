@@ -37,7 +37,7 @@
 
 */
 
-#include <Main/MedianFilter.h>
+#include "MedianFilter.h"
 
 
 MedianFilter::MedianFilter(int size, int seed)

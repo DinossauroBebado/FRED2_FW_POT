@@ -1,15 +1,12 @@
 
-#include <Main/config.h>
+#include <Main_Lib/config.h>
 
-#include "power.h"
+#include <Main_Lib/power.h>
+#include <Main_Lib/MedianFilter.h>
 
+#include <Main_Lib/encoder.h>
 
-#include "MedianFilter.h"
-
-#include "encoder.h"
-
-Encoder encoderRight(39,36);
-Encoder encoderLeft(34,35);
+Encoder encoder(34, 35, 39,36);
 
 MedianFilter encoderRightFilter(33,0);
 MedianFilter encoderLeftFilter(33,0);
@@ -40,8 +37,7 @@ bool debug = true;
 
 void setup() { 
   
-  encoderLeft.setup();
-  encoderRight.setup();
+  encoder.setup();
   pinMode(LED_BUILD_IN,OUTPUT);
   digitalWrite(LED_BUILD_IN,HIGH);
   Serial.begin(115200);
@@ -60,13 +56,13 @@ void loop()
 
     //status -- encoder 
 
-    double angle_encoder_read_right = encoderRight.readAngle();
+    double angle_encoder_read_right = encoder.readAngle(RIGHT);
 
-    double rpm_encoder_read_right = encoderRight.readRPM();
+    double rpm_encoder_read_right = encoder.readRPM(RIGHT);
     encoderRightFilter.in(rpm_encoder_read_right);
     rpm_encoder_read_right = encoderRightFilter.out();
 
-    double ticks_encoder_read_right = encoderRight.readPulses();
+    double ticks_encoder_read_right = encoder.readPulses(RIGHT);
 
     //cmd -- 
 

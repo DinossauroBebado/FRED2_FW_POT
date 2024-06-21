@@ -1,4 +1,4 @@
-#include <Main/config.h>
+#include <Main_Lib/config.h>
 
 class motor
 {
