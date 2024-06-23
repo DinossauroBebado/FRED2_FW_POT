@@ -1,18 +1,19 @@
 
-#include <Main_Lib/config.h>
+#include "config.h"
 
-#include <Main_Lib/power.h>
-#include <Main_Lib/MedianFilter.h>
+#include "power.h"
+#include "MedianFilter.h"
 
-#include <Main_Lib/encoder.h>
+#include "encoder.h"
 
-Encoder encoder(34, 35, 39,36);
+
+#include "controler.h"
 
 MedianFilter encoderRightFilter(33,0);
 MedianFilter encoderLeftFilter(33,0);
 
+Encoder encoder(34, 35, 39,36);
 
-#include "controler.h"
 Controler  esquerda_controler(0.4,0.0001,0.008);  //(p,i,d)
 // Controler  direita_controler(0.4,0.01,0.008);
 Controler  direita_controler(0.4, 0.0001 , 0.008 );  //(p,i,d)
