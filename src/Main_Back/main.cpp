@@ -12,7 +12,7 @@
 //  write docs
 
 #include <Main_Lib/encoder.h>
-Encoder encoder(34, 35, 39,36);
+Encoder encoder(35, 34, 39,36);
 
 #include <Main_Lib/MedianFilter.h>
 MedianFilter encoderRightFilter(33, 0);
