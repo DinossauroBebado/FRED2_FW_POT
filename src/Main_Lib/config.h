@@ -69,13 +69,13 @@
 #define CANAL_M3 2
 #define CANAL_M4 3
 
-#define  M1_IN1  18
-#define  M1_IN2  4
-#define  M1_PWM  13
+#define  M2_IN1  18
+#define  M2_IN2  4
+#define  M2_PWM  13
 
-#define  M2_IN1  19
-#define  M2_IN2  23
-#define  M2_PWM  25
+#define  M1_IN1  19
+#define  M1_IN2  23
+#define  M1_PWM  25
 
 #define ENCODER_RIGHT 36
 #define ENCODER_LEFT 39
