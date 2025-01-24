@@ -1,7 +1,10 @@
 #include <Arduino.h>
 
 
-// Subscribers ----------------------------------
+// -------------------------------------------------------
+// Subscribers
+// -------------------------------------------------------
+
 #define cmd_wheels_topic "cmd_wheels"
 #define cmd_rpm_topic "cmd/rpm"
 #define cmd_vel_topic "cmd_vel/safe"
@@ -10,7 +13,11 @@
 
 
 
-//Publisher -------------------------------------
+
+// -------------------------------------------------------
+// Publishers
+// -------------------------------------------------------
+
 #define pwm_right_topic "power/status/pwm/right"
 #define pwm_left_topic "power/status/pwm/left"
 
@@ -36,17 +43,35 @@
 
 
 
+// -------------------------------------------------------
+// Loop config
+// -------------------------------------------------------
+
 #define LOOP_TIME 200000  
 #define  SERIAL_RATE  115200
 
 
+
+
+// -------------------------------------------------------
+// PWM config
+// -------------------------------------------------------
+
 #define SATURATION 1020
+#define FREQUENCIA 1000  
+#define PWM_SATURATION_UNDER 0
 
-// #define SATURATION 4095
-#define  FREQUENCIA 1000  
+#define CANAL_M1 0
+#define CANAL_M2 1
 
 
-// #define L  0.300
+
+
+
+// -------------------------------------------------------
+// Robot kinematics
+// -------------------------------------------------------
+
 #define L 0.3
 
 #define RADIUS 0.075
@@ -61,31 +86,51 @@
 #define MAX_SPEED_ANGULAR 3.141592653589*2 //rad/s 
 
 
-//define the pins from the HARDWARE project 
 
-//H Bridge 
-#define CANAL_M1 0
-#define CANAL_M2 1
-#define CANAL_M3 2
-#define CANAL_M4 3
 
-#define  M2_IN1  18
-#define  M2_IN2  4
-#define  M2_PWM  13
 
-#define  M1_IN1  19
-#define  M1_IN2  23
-#define  M1_PWM  25
+// -------------------------------------------------------
+// Driver motor pins -> //! FRONT PCB 
+// -------------------------------------------------------
 
-#define ENCODER_RIGHT 36
-#define ENCODER_LEFT 39
+#define  FM1_IN1  19
+#define  FM1_IN2  23
+#define  FM1_PWM  25
 
+#define  FM2_IN1  18
+#define  FM2_IN2  4
+#define  FM2_PWM  13
+
+
+
+
+// -------------------------------------------------------
+// Driver motor pins -> //! BACK PCB 
+// -------------------------------------------------------
+
+#define  BM1_IN1  18
+#define  BM1_IN2  4
+#define  BM1_PWM  13
+
+#define  BM2_IN1  19
+#define  BM2_IN2  23
+#define  BM2_PWM  25
+
+
+
+// -------------------------------------------------------
+// Degub LED
+// -------------------------------------------------------
 
 //debug led
 #define  LED_BUILD_IN  2
 
-#define  LED_STRIP  14
-#define NUMPIXELS   17
+
+
+
+// -------------------------------------------------------
+// ENCODER -> programming pins
+// -------------------------------------------------------
 
 // CHANGE THESE AS APPROPRIATE
 #define CSpin   5
@@ -97,5 +142,3 @@
 #define enc_a  17
 #define enc_b  16
 #define enc_z  2
-
-#define  PWM_SATURATION_UNDER 0
